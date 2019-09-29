@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 namespace OfflineCacheExample
 {
@@ -18,7 +12,19 @@ namespace OfflineCacheExample
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            WebHost
+                .CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    var settings = config.Build();
+                    config.AddAzureAppConfiguration(options => 
+                    {
+                        options
+                            .Connect(settings["ConnectionStrings:AppConfiguration"])
+                            .SetOfflineCache(new OfflineFileCache());
+                    });
+
+                })
                 .UseStartup<Startup>();
     }
 }
