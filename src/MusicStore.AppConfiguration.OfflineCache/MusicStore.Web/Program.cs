@@ -31,6 +31,7 @@ namespace MusicStore.Web
                         config.AddAzureAppConfiguration(options =>
                         {
                             options
+                                // Use managed identity to access app configuration
                                 .Connect(endpoint, new ManagedIdentityCredential(clientId: userAssignedIdentityClientId))
 
                                 // Setup dynamic refresh
@@ -39,6 +40,9 @@ namespace MusicStore.Web
                                     refreshOpt.Register(key: "AppSettings:Version", refreshAll: true, label: LabelFilter.Null);
                                     refreshOpt.SetCacheExpiration(TimeSpan.FromSeconds(10));
                                 })
+
+                                // Setup offline cache
+                                .SetOfflineCache(new OfflineFileCache())
                                 .UseFeatureFlags();
                         });
                     }
